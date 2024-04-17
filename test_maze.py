@@ -1,10 +1,14 @@
 import numpy as np
 
-import mazes
+from mazes import SquareMaze
 
-m = 3
-n = 3
+m = 20
+n = 20
 num_sides = 4
 walls = np.zeros((m, n, int(num_sides/2)), dtype=bool)
-empty_maze = mazes.SquareMaze(walls)
-print(empty_maze.walls)
+walls[2:5, 4, 0] = walls[1, 4, 1] = walls[4, 4, 1] = walls[2, 2, 1] = walls[3, 2, 1] = True
+smile_maze = SquareMaze(walls)
+full_maze = SquareMaze(np.full((m, n, int(num_sides/2)), 1, dtype=bool))
+
+full_maze.draw("filled.png")
+smile_maze.draw("smile.png")
