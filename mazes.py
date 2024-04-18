@@ -139,3 +139,7 @@ class SquareKruskalMaze(SquareMaze):
         self.cells = list(it.compress(self.cells, keep)) + [
             list(it.chain.from_iterable(it.compress(self.cells, remove)))
         ]
+
+    def complete(self):
+        while len(self.cells) > 1:
+            self.step()
