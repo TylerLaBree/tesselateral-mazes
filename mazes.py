@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
+import itertools as it
 
 
 class SquareMaze:
@@ -62,7 +64,7 @@ class SquareMaze:
 
 
 class SquareKruskalMaze(SquareMaze):
-    def __init__(self, width, height, seed=10000):
+    def __init__(self, width, height, seed=None):
         self.width = width
         self.height = height
         self.cells = (
@@ -79,6 +81,9 @@ class SquareKruskalMaze(SquareMaze):
             (self.width, self.height, self.half_num_sides), 1, dtype=bool
         )
         self.cut_out_of_bounds()
+        self.cut_exterior_walls()
+        if seed is not None:
+            random.seed(seed)
 
     def cut_out_of_bounds(self):
         self.wall_map[0, :, 0] = False
@@ -95,5 +100,47 @@ class SquareKruskalMaze(SquareMaze):
         ).reshape((self.width * self.width))
         self.cells = self.cells[cell_filter].tolist()
 
+    def cut_exterior_walls(self):
+        wall_filter = np.apply_along_axis(
+            lambda xyi: not (xyi[0] == 0 and xyi[2] == 1)
+            and not (xyi[1] == 0 and xyi[2] == 0)
+            and not (xyi[0] == self.width - 1 and xyi[2] == 1)
+            and not (xyi[1] == self.height - 1 and xyi[2] == 0),
+            1,
+            self.walls,
+        )
+        self.walls = self.walls[wall_filter]
+
+    def in_same_set(self, pair1, pair2):
+        return any([pair1 in cell_set and pair2 in cell_set for cell_set in self.cells])
+
+    def sets_to_merge(self, pair1, pair2):
+        return [pair1 in cell_set or pair2 in cell_set for cell_set in self.cells]
+
     def step(self):
-        return 0
+        dir_key = [[0, +1], [+1, 0]]
+        random_index = random.randrange(len(self.walls))
+        wall = self.walls[random_index].tolist()
+        position = wall[:2]
+        position_adjacent = [a + b for a, b in zip(position, dir_key[wall[2]])]
+
+        if (
+            position_adjacent[0] > self.width - 1
+            or position_adjacent[1] > self.height - 1
+        ):
+            return 0
+        is_wall = lambda x: not all([a == b for a, b in zip(wall, x)])
+        wall_filter = np.apply_along_axis(is_wall, 1, self.walls)
+        self.walls = self.walls[wall_filter]
+        if self.in_same_set(position, position_adjacent):
+            return 0
+        self.wall_map[wall[0], wall[1], wall[2]] = False
+        remove = self.sets_to_merge(position, position_adjacent)
+        keep = [not elt for elt in remove]
+        self.cells = list(it.compress(self.cells, keep)) + [
+            list(it.chain.from_iterable(it.compress(self.cells, remove)))
+        ]
+
+    def complete(self):
+        while len(self.cells) > 1:
+            self.step()
