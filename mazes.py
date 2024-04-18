@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 
 class SquareMaze:
@@ -62,7 +63,7 @@ class SquareMaze:
 
 
 class SquareKruskalMaze(SquareMaze):
-    def __init__(self, width, height, seed=10000):
+    def __init__(self, width, height, seed=None):
         self.width = width
         self.height = height
         self.cells = (
@@ -79,6 +80,9 @@ class SquareKruskalMaze(SquareMaze):
             (self.width, self.height, self.half_num_sides), 1, dtype=bool
         )
         self.cut_out_of_bounds()
+        self.cut_exterior_walls()
+        if seed is not None:
+            random.seed(seed)
 
     def cut_out_of_bounds(self):
         self.wall_map[0, :, 0] = False
@@ -94,6 +98,17 @@ class SquareKruskalMaze(SquareMaze):
             lambda xy: xy[0] != 0 and xy[1] != 0, 2, self.cells
         ).reshape((self.width * self.width))
         self.cells = self.cells[cell_filter].tolist()
+
+    def cut_exterior_walls(self):
+        wall_filter = np.apply_along_axis(
+            lambda xyi: not (xyi[0] == 0 and xyi[2] == 1)
+            and not (xyi[1] == 0 and xyi[2] == 0)
+            and not (xyi[0] == self.width - 1 and xyi[2] == 1)
+            and not (xyi[1] == self.height - 1 and xyi[2] == 0),
+            1,
+            self.walls,
+        )
+        self.walls = self.walls[wall_filter]
 
     def step(self):
         return 0
