@@ -110,5 +110,32 @@ class SquareKruskalMaze(SquareMaze):
         )
         self.walls = self.walls[wall_filter]
 
+    def in_same_set(self, pair1, pair2):
+        return any([pair1 in cell_set and pair2 in cell_set for cell_set in self.cells])
+
+    def sets_to_merge(self, pair1, pair2):
+        return [pair1 in cell_set or pair2 in cell_set for cell_set in self.cells]
+
     def step(self):
-        return 0
+        dir_key = [[0, +1], [+1, 0]]
+        random_index = random.randrange(len(self.walls))
+        wall = self.walls[random_index].tolist()
+        position = wall[:2]
+        position_adjacent = [a + b for a, b in zip(position, dir_key[wall[2]])]
+
+        if (
+            position_adjacent[0] > self.width - 1
+            or position_adjacent[1] > self.height - 1
+        ):
+            return 0
+        is_wall = lambda x: not all([a == b for a, b in zip(wall, x)])
+        wall_filter = np.apply_along_axis(is_wall, 1, self.walls)
+        self.walls = self.walls[wall_filter]
+        if self.in_same_set(position, position_adjacent):
+            return 0
+        self.wall_map[wall[0], wall[1], wall[2]] = False
+        remove = self.sets_to_merge(position, position_adjacent)
+        keep = [not elt for elt in remove]
+        self.cells = list(it.compress(self.cells, keep)) + [
+            list(it.chain.from_iterable(it.compress(self.cells, remove)))
+        ]
