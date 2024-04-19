@@ -65,15 +65,15 @@ class SquareMaze:
 
 class SquareKruskalMaze(SquareMaze):
     def __init__(self, width, height, seed=None):
-        self.width = width
-        self.height = height
+        self.width = width + 1
+        self.height = height + 1
         self.cells = (
-            np.indices((width, height))
+            np.indices((self.width, self.height))
             .transpose((2, 1, 0))
             .reshape((self.width * self.height, 1, 2))
         )
         self.walls = (
-            np.indices((width, height, self.half_num_sides))
+            np.indices((self.width, self.height, self.half_num_sides))
             .transpose((3, 1, 2, 0))
             .reshape((self.width * self.height * 2, 3))
         )
