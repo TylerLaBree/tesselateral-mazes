@@ -5,6 +5,9 @@ import itertools as it
 
 
 class SquareMaze:
+    """
+    Fundamental object class for any maze made up of square cells.
+    """
     half_num_sides = 2
     start = None
     end = None
@@ -17,10 +20,18 @@ class SquareMaze:
             print("ERROR: wall_map shape incorrect")
 
     def cut_out_of_bounds(self):
+        """
+        Removes walls which are not in the maze region.
+        South-facing walls on the left, and East-facing walls on the top are not needed
+        and not used. If the user defined these, remove them.
+        """
         self.wall_map[0, :, 0] = False
         self.wall_map[:, 0, 1] = False
 
     def plot(self):
+        """
+        Display the square maze using matplotlib.
+        """
         xs = np.broadcast_to(
             np.arange(self.width), (self.height, self.width)
         ).transpose()
@@ -82,6 +93,9 @@ class SquareMaze:
 
 
 class SquareKruskalMaze(SquareMaze):
+    """
+    Compound object class for sqaure tiling mazes created using Kruskal's Algorithm.
+    """
     def __init__(self, width, height, seed=None):
         self.width = width + 1
         self.height = height + 1
@@ -104,6 +118,10 @@ class SquareKruskalMaze(SquareMaze):
             random.seed(seed)
 
     def cut_out_of_bounds(self):
+        """
+        Removes walls and cells which are outside the maze from the various data
+        structures used to compute a maze using Kruskal's algorithm
+        """
         self.wall_map[0, :, 0] = False
         self.wall_map[:, 0, 1] = False
         wall_filter = np.apply_along_axis(
@@ -119,6 +137,10 @@ class SquareKruskalMaze(SquareMaze):
         self.cells = self.cells[cell_filter].tolist()
 
     def cut_exterior_walls(self):
+        """
+        Removes exterior walls from the wall list available to Kruskal's algorithm.
+        This is because Kruskal's algorithm searches internal walls to remove at random.
+        """
         wall_filter = np.apply_along_axis(
             lambda xyi: not (xyi[0] == 0 and xyi[2] == 1)
             and not (xyi[1] == 0 and xyi[2] == 0)
@@ -130,12 +152,22 @@ class SquareKruskalMaze(SquareMaze):
         self.walls = self.walls[wall_filter]
 
     def in_same_set(self, pair1, pair2):
+        """
+        Checks if two cells are in the same set in self.cells.
+        """
         return any([pair1 in cell_set and pair2 in cell_set for cell_set in self.cells])
 
     def sets_to_merge(self, pair1, pair2):
+        """
+        Gives the a list containing the positions of the two sets containing cells
+        in question.
+        """
         return [pair1 in cell_set or pair2 in cell_set for cell_set in self.cells]
 
     def step(self):
+        """
+        Runs one step of Kruskal's algorithm.
+        """
         dir_key = [[0, +1], [+1, 0]]
         random_index = random.randrange(len(self.walls))
         wall = self.walls[random_index].tolist()
@@ -160,16 +192,28 @@ class SquareKruskalMaze(SquareMaze):
         ]
 
     def remove_wall(self, wall):
+        """
+        Removes a wall from the wall_map.
+        """
         self.wall_map[wall[0], wall[1], wall[2]] = False
 
     def add_start(self, cell, exterior_wall):
+        """
+        Adds a start label and removes an exterior wall.
+        """
         self.start = cell
         self.remove_wall(exterior_wall)
 
     def add_end(self, cell, exterior_wall):
+        """
+        Adds a end label and removes an exterior wall.
+        """
         self.end = cell
         self.remove_wall(exterior_wall)
 
     def complete(self):
+        """
+        Runs Kruskal's algorithm until the maze is complete.
+        """
         while len(self.cells) > 1:
             self.step()
