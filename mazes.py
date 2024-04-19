@@ -151,18 +151,18 @@ class SquareKruskalMaze(SquareMaze):
         )
         self.walls = self.walls[wall_filter]
 
-    def in_same_set(self, pair1, pair2):
+    def in_same_set(self, cell1, cell2):
         """
         Checks if two cells are in the same set in self.cells.
         """
-        return any([pair1 in cell_set and pair2 in cell_set for cell_set in self.cells])
+        return any([cell1 in cell_set and cell2 in cell_set for cell_set in self.cells])
 
-    def sets_to_merge(self, pair1, pair2):
+    def sets_to_merge(self, cell1, cell2):
         """
         Gives the a list containing the positions of the two sets containing cells
         in question.
         """
-        return [pair1 in cell_set or pair2 in cell_set for cell_set in self.cells]
+        return [cell1 in cell_set or cell2 in cell_set for cell_set in self.cells]
 
     def step(self):
         """
