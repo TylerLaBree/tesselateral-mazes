@@ -57,26 +57,26 @@ class SquareMaze:
         )
         if self.start is not None:
             plt.text(
-                self.start[0]-0.5,
-                self.start[1]-0.5,
+                self.start[0] - 0.5,
+                self.start[1] - 0.5,
                 "START",
-                horizontalalignment = "center",
-                verticalalignment = "center",
+                horizontalalignment="center",
+                verticalalignment="center",
             )
         if self.end is not None:
             plt.text(
-                self.end[0]-0.5,
-                self.end[1]-0.5,
+                self.end[0] - 0.5,
+                self.end[1] - 0.5,
                 "END",
-                horizontalalignment = "center",
-                verticalalignment = "center",
+                horizontalalignment="center",
+                verticalalignment="center",
             )
         plt.xticks([])
         plt.yticks([])
-        plt.xlim([-0.01, self.width - 1+0.01])
-        plt.ylim([-0.01, self.height - 1+0.01])
+        plt.xlim([-0.01, self.width - 1 + 0.01])
+        plt.ylim([-0.01, self.height - 1 + 0.01])
         plt.ylim(max(plt.ylim()), min(plt.ylim()))
-        plt.axis('off')
+        plt.axis("off")
         plt.gca().set_aspect("equal")
         return plt
 
@@ -165,7 +165,7 @@ class SquareKruskalMaze(SquareMaze):
     def add_start(self, cell, exterior_wall):
         self.start = cell
         self.remove_wall(exterior_wall)
-    
+
     def add_end(self, cell, exterior_wall):
         self.end = cell
         self.remove_wall(exterior_wall)
